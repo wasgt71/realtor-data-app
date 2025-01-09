@@ -10,47 +10,23 @@ async function scrapeRealtorsByCity(city) {
     });
   }
 
-  console.log("hey");
   // Go to realtor.com/'city of choice'
   await page.goto(`https://www.realtor.com/realestateagents/${city}`);
 
   console.log("Made it to Page");
-  // Click Email Realtor Button
-  await delay(4000);
+  await delay(2000);
 
-  await page.$$eval(".eOJwqh", (buttons) => {
-    for (const button of buttons) {
-      if (button.textContent === "Email") {
-        button.click();
-        break; // Clicking the first matching button and exiting the loop
-      }
-    }
-  });
+  for (let i = 0; i < 20; i++) {
+    const buttons = await page.$$(".agent-email .eOJwqh");
+    await buttons[i].click();
+    await page.waitForSelector("#name");
+    await page.locator("#name").fill("L3trs");
+    await page.locator("#email").fill("info@L3trs.com");
+    await page.locator("#comment").fill("Check out l3trs.com");
+    await page.locator("svg").click();
+  }
 
-  console.log("button clicked");
-
-  await page.locator("#name").fill("L3trs");
-  await page.locator("#email").fill("info@L3trs.com");
-  await page.locator("#comment").fill("Check out l3trs.com");
-
-  await page.$eval(".recaptcha-checkbox-border").click();
-  console.log("captcha solved");
-  
-  await delay(3000);
-
-  const emailData = await page.evaluate(() => {
-    const data = [];
-    const title = document.querySelector(".p.GLfFQ").innerHTML.trim();
-
-    console.log("extracted data");
-
-    data.push({ title });
-
-    console.log(data);
-
-    return data;
-  });
+  browser.close();
 }
-
 // Run the scraper for specific city.
-scrapeRealtorsByCity(`windermere_fl`);
+scrapeRealtorsByCity(`dallas_tx`);
